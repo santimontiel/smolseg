@@ -1,0 +1,12 @@
+lightning
+opencv-python
+nuscenes-devkit
+schedulefree
+wandb
+rich
+torchinfo
+moviepy
+imageio
+timm
+transformers
+segmentation-models-pytorch
