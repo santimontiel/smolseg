@@ -48,7 +48,7 @@ class SegmentationModule(L.LightningModule):
         images = batch["image"]
         masks = batch["mask"]
 
-        logits = self.model(images)["out"]
+        logits = self.model(images)
         predictions = torch.argmax(logits, dim=1)
 
         ce_loss = self.losses["ce"](logits, masks)
@@ -70,7 +70,7 @@ class SegmentationModule(L.LightningModule):
         images = batch["image"]
         masks = batch["mask"]
 
-        logits = self.model(images)["out"]
+        logits = self.model(images)
         predictions = torch.argmax(logits, dim=1)
 
         ce_loss = self.losses["ce"](logits, masks)

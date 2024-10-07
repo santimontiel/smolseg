@@ -8,23 +8,32 @@ from torch.utils.data import DataLoader
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor, RichModelSummary
 from lightning.pytorch.loggers import WandbLogger
 
+from smolseg.models import build_model
 from smolseg.module import SegmentationModule
 from smolseg.data.cityscapes import Cityscapes
 
 
 def train(
-    root_dir,    
-    max_epochs,
-    run_name,
-    batch_size,
-    num_workers,
+    root_dir: str,  
+    max_epochs: int,
+    model_name: str,
+    pretrained: bool,
+    run_name: str,
+    batch_size: int,
+    num_workers: int,
 ):
+    
     train_dataset = Cityscapes(root_dir=root_dir, split="train")
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
     val_dataset = Cityscapes(root_dir=root_dir, split="val")
     val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
 
-    model = models.deeplabv3_mobilenet_v3_large(num_classes=Cityscapes.NUM_CLASSES)
+    # model = models.deeplabv3_mobilenet_v3_large(num_classes=Cityscapes.NUM_CLASSES)
+    model = build_model(
+        model_name=model_name,
+        num_classes=Cityscapes.NUM_CLASSES,
+        pretrained=pretrained,
+    )
     module = SegmentationModule(
         model=model,
         device="cuda",
@@ -75,10 +84,14 @@ def train(
 
 
 if __name__ == '__main__':
+    model_name = "unet_seresnext26d"
+    pretrained = True if model_name == "unet_seresnext26d" else False
     train(
         root_dir="/data/cityscapes",
         max_epochs=200,
-        run_name="deeplabv3_mobilenet_v3_large",
+        model_name=model_name,
+        pretrained=pretrained,
+        run_name=model_name,
         batch_size=8,
         num_workers=16,
     )
