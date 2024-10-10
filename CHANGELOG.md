@@ -2,6 +2,11 @@
 
 ## Alpha state. Version 0.
 
+### Version 0.0.2
+* Add support to more smp models.
+* Benchmark script.
+* Model zoo and badges in README.md
+
 ### Version 0.0.1
 
 * Add support for torchvision and smp models. Start with only two models: deeplabv3_mobilenetv3_large and unet_seresnext26d.

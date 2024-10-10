@@ -90,6 +90,11 @@ class SegmentationModule(L.LightningModule):
 
 
     def configure_optimizers(self):
+
+        # If in inference mode, return None.
+        if self.train_loader is None:
+            return None
+
         optim = torch.optim.AdamW(
             self.model.parameters(),
             lr=self.params["lr"],

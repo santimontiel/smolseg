@@ -34,3 +34,6 @@ attach:
 
 jupyter:
 	$(call run_docker, "jupyter notebook")
+
+stop:
+	docker stop $(CONTAINER_NAME)
