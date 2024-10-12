@@ -15,6 +15,7 @@ class Normalize:
 
     def __call__(self, sample):
         images, masks = sample['image'], sample['mask']
+        sample["orig_image"] = images
         images = self.transform(images)
         return {'image': images, 'mask': masks}
     

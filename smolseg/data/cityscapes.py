@@ -75,6 +75,18 @@ class Cityscapes(Dataset):
     ID_TO_TRAIN_ID = [cls.train_id for cls in CLASSES]
     NUM_CLASSES = 19
 
+    default_train_transforms = [
+        RandomResizeAndCrop(),
+        RandomFlip(),
+        Resize(size=(512, 1024)),
+        PhotoMetricDistortion(),
+        Normalize(),
+    ]
+    default_val_transforms = default_test_transforms = [
+        Resize(size=(512, 1024)),
+        Normalize(),
+    ]
+
     def __init__(
         self,
         root_dir: str,
@@ -119,25 +131,21 @@ class Cityscapes(Dataset):
     
     def _set_default_transforms(self):
         if self.split == "train":
-            return [
-                RandomResizeAndCrop(),
-                RandomFlip(),
-                Resize(size=(512, 1024)),
-                PhotoMetricDistortion(),
-                Normalize(),
-            ]
+            return self.train_transforms
         elif self.split == "val":
-            return [
-                Resize(size=(512, 1024)),
-                Normalize(),
-            ]
-            
-    def _load_image(self, index: int) -> Tensor:
-        image = read_image(self.images[index]).float() / 255.0
+            return self.val_transforms
+        elif self.split == "test":
+            return self.test_transforms
+        else:
+            raise ValueError(f"split must be either 'train', 'val', or 'test', not {self.split}")
+
+    @staticmethod
+    def _load_image(image_path: str) -> Tensor:
+        image = read_image(image_path).float() / 255.0
         return image
     
-    def _load_labels(self, index: int) -> Tensor:
-        labels = np.array(Image.open(self.labels[index]))
+    def _load_labels(self, label_path: str) -> Tensor:
+        labels = np.array(Image.open(label_path))
         labels = np.array([self.ID_TO_TRAIN_ID[label] for label in labels.flatten()], dtype=np.uint8)
         labels = labels.reshape((1024, 2048))
         labels = torch.from_numpy(labels)
@@ -146,8 +154,10 @@ class Cityscapes(Dataset):
     def __getitem__(self, index: int) -> Dict[str, Tensor]:
 
         data = {}
-        data["image"] = self._load_image(index)
-        data["mask"] = self._load_labels(index)
+        image_path = self.images[index]
+        label_path = self.labels[index]
+        data["image"] = self._load_image(image_path)
+        data["mask"] = self._load_labels(label_path)
 
         for transform in self.transforms:
             data = transform(data)
