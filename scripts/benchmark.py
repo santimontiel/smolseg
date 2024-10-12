@@ -9,7 +9,7 @@ from torch import Tensor
 from smolseg.engine import load_pretrained_model
 
 @torch.inference_mode()
-def benchmark(model: Callable, inputs: Tensor) -> Dict[str, float]:
+def benchmark(model: Callable, inputs: Tensor, N: int = 100) -> Dict[str, float]:
 
     # Warm up the model.
     model.eval()
@@ -20,17 +20,17 @@ def benchmark(model: Callable, inputs: Tensor) -> Dict[str, float]:
     torch.cuda.synchronize()
     torch.cuda.reset_peak_memory_stats()
 
-    # Time up to 10 runs.
+    # Time up to N runs.
     start_time = torch.cuda.Event(enable_timing=True)
     end_time = torch.cuda.Event(enable_timing=True)
     start_time.record()
-    for _ in range(100):
+    for _ in range(N):
         model(inputs)
     end_time.record()
     torch.cuda.synchronize()
 
     return {
-        "time": start_time.elapsed_time(end_time) / 100,             # ms
+        "time": start_time.elapsed_time(end_time) / N,            # ms
         "memory": torch.cuda.max_memory_allocated() / 1024**2,      # MB
         "params": sum(p.numel() for p in model.parameters()) / 1e6, # M params
     }
