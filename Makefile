@@ -35,5 +35,8 @@ attach:
 jupyter:
 	$(call run_docker, "jupyter notebook")
 
+train:
+	$(call run_docker, "python scripts/train.py")
+
 stop:
 	docker stop $(CONTAINER_NAME)
