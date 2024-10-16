@@ -15,7 +15,11 @@ from smolseg.data.transforms import (
     RandomResizeAndCrop,
     RandomFlip,
     Resize,
-    PhotoMetricDistortion,
+    ColorJitter,
+    RandomValueAdd,
+    RandomValueScale,
+    RandomChannelSwap,
+    GridMask,
 )
 
 @dataclass
@@ -79,7 +83,11 @@ class Cityscapes(Dataset):
         RandomResizeAndCrop(),
         RandomFlip(),
         Resize(size=(512, 1024)),
-        PhotoMetricDistortion(),
+        ColorJitter(),
+        RandomValueAdd(),
+        RandomValueScale(),
+        RandomChannelSwap(),
+        GridMask(0.2),
         Normalize(),
     ]
     default_val_transforms = default_test_transforms = [
@@ -131,11 +139,11 @@ class Cityscapes(Dataset):
     
     def _set_default_transforms(self):
         if self.split == "train":
-            return self.train_transforms
+            return self.default_train_transforms
         elif self.split == "val":
-            return self.val_transforms
+            return self.default_val_transforms
         elif self.split == "test":
-            return self.test_transforms
+            return self.default_test_transforms
         else:
             raise ValueError(f"split must be either 'train', 'val', or 'test', not {self.split}")
 
